@@ -34,25 +34,27 @@ public class TipFragment extends Fragment {
     private double tipAmount = 0;
     private double totalAmount = 0;
 
+    // Instantiate the UI view
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_tip, container, false);
 
-        // restore previous percentage
+        // Restore percentage state from last session
         if(savedInstanceState != null) {
             tipPercent = savedInstanceState.getInt(KEY_PERCENT, 15);
         }
 
-        // Slider
+        // Slider view object
         mTipSlider = (SeekBar)v.findViewById(R.id.tipSlider);
-        // Slider listener
+        // Add listener to Slider
         mTipSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (!fromUser)
                     return;
+                // Tip increment/decrement by 5% per notch on progress bar
                 tipPercent = (progress + 1) * 5;
                 updateTipUI();
             }
@@ -68,12 +70,13 @@ public class TipFragment extends Fragment {
             }
         });
 
-        // Percent Text
+        // Percent Text view
         mTipPercentText = (TextView)v.findViewById(R.id.tipPercentText);
 
 
-        // Bill Amount Text
+        // Bill Amount Text view
         mBillText = (EditText)v.findViewById(R.id.billText);
+        // Only allow 5 digits left and 2 digits after decimal point
         mBillText.setFilters(new InputFilter[]{new MoneyInputFilter(5, 2)});
         mBillText.addTextChangedListener(new TextWatcher() {
 
@@ -93,13 +96,13 @@ public class TipFragment extends Fragment {
             }
         });
 
-        //  Tip Amount Text
+        //  Tip Amount Text view
         mTipAmountText = (EditText)v.findViewById(R.id.tipAmountText);
 
-        // Total Text
+        // Total Text view
         mTotalText = (EditText)v.findViewById(R.id.totalText);
 
-        // Calculate Button
+        // Calculate Button view
         mCalculateButton = (Button)v.findViewById(R.id.calculateButton);
         mCalculateButton.setOnClickListener(new View.OnClickListener() {
 
@@ -115,21 +118,24 @@ public class TipFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        Log.i(TAG, "onSaveInstanceState");
+        // Save percentage for next time the app is opened
         savedInstanceState.putInt(KEY_PERCENT, tipPercent);
     }
 
+    // Calculates tip and total amounts and calls for UI to be updated
     public void updateValues() {
         tipAmount = billAmount * (double)tipPercent / 100;
         totalAmount = billAmount + tipAmount;
         updateValueUI();
     }
 
+    // Updates the texts on the UI to display current stored values
     public void updateValueUI() {
         mTipAmountText.setText(dollarsString(tipAmount));
         mTotalText.setText(dollarsString(totalAmount));
     }
 
+    // Updates the tip % text above the slider and moves the slider to stored %
     public void updateTipUI() {
         mTipPercentText.setText(tipPercent + " %");
         int sliderProgress = tipPercent / 5 - 1;
@@ -137,6 +143,7 @@ public class TipFragment extends Fragment {
     }
 
     // Helpers
+    // Takes a currency string and returns a double amount to 2 decimal places
     private static double dollarsDouble(String s) {
         double amt = 0.0;
         if (s == null)
@@ -154,11 +161,13 @@ public class TipFragment extends Fragment {
         return amt;
     }
 
+    // Takes a double and returns a string formatted as currency
     private static String dollarsString(double d) {
         return String.format("%.2f", d);
     }
 
-    // used to restrict input format of money
+    // Restricts the input format of money
+    // Used by the bill text field
     class MoneyInputFilter implements InputFilter {
         private Pattern pattern;
 
